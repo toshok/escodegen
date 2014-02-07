@@ -2599,7 +2599,7 @@
 
     FORMAT_DEFAULTS = getDefaultOptions().format;
 
-    exports.version = require('./package.json').version;
+    exports.version = '1.8.1'; //require('./package.json').version;
     exports.generate = generate;
     exports.attachComments = estraverse.attachComments;
     exports.Precedence = updateDeeply({}, Precedence);
