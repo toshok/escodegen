@@ -75,6 +75,7 @@
         CatchClause: 'CatchClause',
         ComprehensionBlock: 'ComprehensionBlock',
         ComprehensionExpression: 'ComprehensionExpression',
+        ComputedPropertyKey: 'ComputedPropertyKey',
         ConditionalExpression: 'ConditionalExpression',
         ContinueStatement: 'ContinueStatement',
         DirectiveStatement: 'DirectiveStatement',
@@ -862,20 +863,6 @@
         return result;
     }
 
-    function generatePropertyKey(expr, computed, option) {
-        var result = [];
-
-        if (computed) {
-            result.push('[');
-        }
-        result.push(generateExpression(expr, option));
-        if (computed) {
-            result.push(']');
-        }
-
-        return result;
-    }
-
     function generateExpression(expr, option) {
         var result,
             precedence,
@@ -1075,6 +1062,14 @@
             result = parenthesize(result, Precedence.New, precedence);
             break;
 
+	case Syntax.ComputedPropertyKey:
+            result = ['[', generateExpression(expr.expression, {
+                precedence: Precedence.Sequence,
+                allowIn: true,
+                allowCall: allowCall
+            }), ']'];
+	    break;
+	    
         case Syntax.MemberExpression:
             result = [generateExpression(expr.object, {
                 precedence: Precedence.Call,
@@ -1245,7 +1240,7 @@
             if (expr.kind === 'get' || expr.kind === 'set') {
                 result = [
                     expr.kind, noEmptySpace(),
-                    generatePropertyKey(expr.key, expr.computed, {
+                    generateExpression(expr.key, {
                         precedence: Precedence.Sequence,
                         allowIn: true,
                         allowCall: true
@@ -1254,7 +1249,7 @@
                 ];
             } else {
                 if (expr.shorthand) {
-                    result = generatePropertyKey(expr.key, expr.computed, {
+                    result = generateExpression(expr.key, {
                         precedence: Precedence.Sequence,
                         allowIn: true,
                         allowCall: true
@@ -1264,14 +1259,14 @@
                     if (expr.value.generator) {
                         result.push('*');
                     }
-                    result.push(generatePropertyKey(expr.key, expr.computed, {
+                    result.push(generateExpression(expr.key, {
                         precedence: Precedence.Sequence,
                         allowIn: true,
                         allowCall: true
                     }), generateFunctionBody(expr.value));
                 } else {
                     result = [
-                        generatePropertyKey(expr.key, expr.computed, {
+                        generateExpression(expr.key, {
                             precedence: Precedence.Sequence,
                             allowIn: true,
                             allowCall: true
@@ -2066,6 +2061,7 @@
         case Syntax.BinaryExpression:
         case Syntax.CallExpression:
         case Syntax.ConditionalExpression:
+        case Syntax.ComputedPropertyKey:
         case Syntax.FunctionExpression:
         case Syntax.Identifier:
         case Syntax.Literal:
