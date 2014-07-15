@@ -84,6 +84,7 @@ module estraverse from '../estraverse/estraverse-es6';
         ExpressionStatement: 'ExpressionStatement',
         ForStatement: 'ForStatement',
         ForInStatement: 'ForInStatement',
+        ForOfStatement: 'ForInStatement',
         FunctionDeclaration: 'FunctionDeclaration',
         FunctionExpression: 'FunctionExpression',
         Identifier: 'Identifier',
@@ -99,8 +100,10 @@ module estraverse from '../estraverse/estraverse-es6';
         Property: 'Property',
         ReturnStatement: 'ReturnStatement',
         SequenceExpression: 'SequenceExpression',
+        SpreadElement: 'SpreadElement',
         SwitchStatement: 'SwitchStatement',
         SwitchCase: 'SwitchCase',
+	TemplateLiteral: 'TemplateLiteral',
         ThisExpression: 'ThisExpression',
         ThrowStatement: 'ThrowStatement',
         TryStatement: 'TryStatement',
@@ -1383,8 +1386,16 @@ module estraverse from '../estraverse/estraverse-es6';
             result = 'this';
             break;
 
+	case Syntax.TemplateLiteral:
+	    result = "`templateXX`";
+	    break;
+
         case Syntax.Identifier:
             result = generateIdentifier(expr);
+            break;
+
+        case Syntax.SpreadElement:
+            result = ['...', generateIdentifier(expr.argument)];
             break;
 
         case Syntax.Literal:
@@ -1866,6 +1877,36 @@ module estraverse from '../estraverse/estraverse-es6';
                 }
 
                 result = join(result, 'in');
+                result = [join(
+                    result,
+                    generateExpression(stmt.right, {
+                        precedence: Precedence.Sequence,
+                        allowIn: true,
+                        allowCall: true
+                    })
+                ), ')'];
+            });
+            result.push(maybeBlock(stmt.body, semicolon === ''));
+            break;
+
+        case Syntax.ForOfStatement:
+            result = ['for' + space + '('];
+            withIndent(function () {
+                if (stmt.left.type === Syntax.VariableDeclaration) {
+                    withIndent(function () {
+                        result.push(stmt.left.kind + noEmptySpace(), generateStatement(stmt.left.declarations[0], {
+                            allowIn: false
+                        }));
+                    });
+                } else {
+                    result.push(generateExpression(stmt.left, {
+                        precedence: Precedence.Call,
+                        allowIn: true,
+                        allowCall: true
+                    }));
+                }
+
+                result = join(result, 'of');
                 result = [join(
                     result,
                     generateExpression(stmt.right, {
