@@ -31,10 +31,11 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-module estraverse from '../estraverse/estraverse-es6';
+//export { attachComments } from '../estraverse/estraverse-es6';
+export let version = "0.0.28-dev";
+export let browser = false;
 
 /*global exports:true, generateStatement:true, generateExpression:true, require:true, global:true*/
-(function () {
     'use strict';
 
     var Syntax,
@@ -2009,7 +2010,7 @@ module estraverse from '../estraverse/estraverse-es6';
         return toSourceNode(result, stmt);
     }
 
-    function generate(node, options) {
+    export function generate(node, options) {
         var defaultOptions = getDefaultOptions(), result, pair;
 
         if (options != null) {
@@ -2055,8 +2056,9 @@ module estraverse from '../estraverse/estraverse-es6';
         sourceMap = options.sourceMap;
         extra = options;
 
+/*
         if (sourceMap) {
-            if (!exports.browser) {
+            if (!browser) {
                 // We assume environment is node.js
                 // And prevent from including source-map by browserify
                 SourceNode = require('source-map').SourceNode;
@@ -2064,8 +2066,11 @@ module estraverse from '../estraverse/estraverse-es6';
                 SourceNode = global.sourceMap.SourceNode;
             }
         } else {
+*/
             SourceNode = SourceNodeMock;
+/*
         }
+*/
 
         switch (node.type) {
         case Syntax.BlockStatement:
@@ -2143,7 +2148,7 @@ module estraverse from '../estraverse/estraverse-es6';
         return pair.map.toString();
     }
 
-    FORMAT_MINIFY = {
+    export let FORMAT_MINIFY = {
         indent: {
             style: '',
             base: 0
@@ -2157,16 +2162,6 @@ module estraverse from '../estraverse/estraverse-es6';
         semicolons: false
     };
 
-    FORMAT_DEFAULTS = getDefaultOptions().format;
-
-    exports.version = "0.0.28-dev";
-    exports.generate = generate;
-    exports.attachComments = estraverse.attachComments;
-    exports.browser = false;
-    exports.FORMAT_MINIFY = FORMAT_MINIFY;
-    exports.FORMAT_DEFAULTS = FORMAT_DEFAULTS;
-}());
-
-export let generate = exports.generate;
+    export let FORMAT_DEFAULTS = getDefaultOptions().format;
 
 /* vim: set sw=4 ts=4 et tw=80 : */
