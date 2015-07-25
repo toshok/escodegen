@@ -55,7 +55,7 @@
         sourceCode,
         preserveBlankLines;
 
-    import * as esutils from '../esutils/esutils-es6';
+    import esutils from '../esutils/esutils-es6';
     import { Syntax } from '../estraverse/estraverse-es6';
 
     // Generation is done by generateExpression.
